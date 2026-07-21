@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bxvCS Computer Science</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM (Development Versions for browser) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel (Compiles JSX in the browser) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans selection:bg-indigo-500/30">
+    <!-- React will inject the app into this div -->
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // Extract hooks from the global React object instead of importing
+        const { useState } = React;
+
+        // ==========================================
+        // CONSTANTS & CONFIGURATION
+        // ==========================================
+        const GOOGLE_FORM_URL = "https://forms.google.com";
+
+        // ==========================================
+        // STATIC DATABASES
+        // ==========================================
+        const COURSES_DATA = [
+          {
+            id: 'python-basics',
+            title: 'Python: Beginner to Advanced',
+            category: 'Software Engineering',
+            duration: '8 Weeks',
+            difficulty: 'All Levels',
+            description: 'A comprehensive journey through Python, starting from fundamental syntax and moving into advanced data structures, object-oriented programming, and file handling.',
+            syllabus: [
+              'Variables, Data Types & Control Flow',
+              'Functions, Modules & Packages',
+              'Object-Oriented Programming (OOP)',
+              'Error Handling & File I/O'
+            ]
+          },
+          {
+            id: 'java-masterclass',
+            title: 'Java: Beginner to Advanced',
+            category: 'Software Engineering',
+            duration: '10 Weeks',
+            difficulty: 'All Levels',
+            description: 'Master Java from the ground up. This path covers the JVM, core language features, robust system design, and building scalable backend applications.',
+            syllabus: [
+              'Java Syntax & Core Concepts',
+              'Classes, Interfaces & Polymorphism',
+              'Collections Framework & Generics',
+              'Multithreading & Concurrency'
+            ]
+          },
+          {
+            id: 'ml-python',
+            title: 'Machine Learning with Python for All',
+            category: 'Data & AI',
+            duration: '8 Weeks',
+            difficulty: 'Intermediate',
+            description: 'Bridge the gap between raw data and predictive models. Learn standard ML algorithms, data preprocessing, and model evaluation using scikit-learn and pandas.',
+            syllabus: [
+              'Data Manipulation with Pandas & NumPy',
+              'Supervised Learning (Regression & Classification)',
+              'Unsupervised Learning (Clustering)',
+              'Model Evaluation & Tuning'
+            ]
+          },
+          {
+            id: 'javascript-full',
+            title: 'JavaScript: Beginner to Advanced',
+            category: 'Web Development',
+            duration: '8 Weeks',
+            difficulty: 'All Levels',
+            description: 'The definitive guide to the language of the web. Move from basic scripts to advanced asynchronous patterns, closures, and the modern ES6+ ecosystem.',
+            syllabus: [
+              'DOM Manipulation & Events',
+              'Scopes, Closures & Hoisting',
+              'Asynchronous JS (Promises, async/await)',
+              'Modern ES6+ Features & Tooling'
+            ]
+          },
+          {
+            id: 'frontend-dev',
+            title: 'Front End Development',
+            category: 'Web Development',
+            duration: '6 Weeks',
+            difficulty: 'Beginner',
+            description: 'Build responsive, accessible, and beautiful web interfaces. Learn the structural foundation of HTML, styling with modern CSS, and basic interactivity.',
+            syllabus: [
+              'Semantic HTML5 & Accessibility',
+              'CSS3 Fundamentals & Flexbox/Grid',
+              'Responsive Web Design',
+              'State Management Basics'
+            ]
+          },
+          {
+            id: 'cybersec-fundamentals',
+            title: 'Cybersecurity Fundamentals',
+            category: 'Security',
+            duration: '6 Weeks',
+            difficulty: 'Beginner',
+            description: 'Understand the core principles of digital security. Explore common vulnerabilities, threat modeling, network security basics, and safe coding practices.',
+            syllabus: [
+              'Core Concepts (CIA Triad)',
+              'Network Security & Cryptography Basics',
+              'Common Web Vulnerabilities (OWASP)',
+              'Identity & Access Management'
+            ]
+          },
+          {
+            id: 'ai-fundamentals',
+            title: 'AI Fundamentals',
+            category: 'Data & AI',
+            duration: '5 Weeks',
+            difficulty: 'Beginner',
+            description: 'A conceptual introduction to Artificial Intelligence. Understand how modern AI systems work without getting bogged down in complex mathematics.',
+            syllabus: [
+              'History & Scope of AI',
+              'Neural Networks Simplified',
+              'Natural Language Processing Basics',
+              'Ethics & Bias in AI Systems'
+            ]
+          }
+        ];
+
+        const TEAM_DATA = [
+          {
+            id: 'sarah',
+            name: 'Sarah Chen',
+            role: 'Founder & CEO',
+            bio: 'Former senior engineer who left big tech to make high-quality computer science education accessible to everyone, regardless of background.',
+            gradient: 'from-emerald-400 to-teal-600'
+          },
+          {
+            id: 'marcus',
+            name: 'Marcus Brody',
+            role: 'Co-Founder & Curriculum Director',
+            bio: 'Educator and software architect passionate about structuring complex technical concepts into approachable, logical learning paths.',
+            gradient: 'from-indigo-400 to-blue-600'
+          },
+          {
+            id: 'elena',
+            name: 'Elena Rostova',
+            role: 'Head of Marketing & Outreach',
+            bio: 'Dedicated to connecting eager learners with our resources and building partnerships with communities across the globe.',
+            gradient: 'from-purple-400 to-indigo-600'
+          },
+          {
+            id: 'jordan',
+            name: 'Jordan Kross',
+            role: 'Lead Platform Advocate',
+            bio: 'Ensures the bxvCS platform remains intuitive, fast, and constantly evolving based on direct feedback from our student community.',
+            gradient: 'from-rose-400 to-orange-500'
+          }
+        ];
+
+        const VOLUNTEER_ROLES = [
+          {
+            icon: '📝',
+            title: 'Content Contributor',
+            description: 'Help draft friendly explanations, create practical exercises, and review syllabus structures to ensure clarity and accuracy.'
+          },
+          {
+            icon: '🤝',
+            title: 'Community Moderator',
+            description: 'Foster a welcoming environment in our forums and channels. Help maintain clean, respectful, and collaborative learning spaces.'
+          },
+          {
+            icon: '💻',
+            title: 'Technical Supporter',
+            description: 'Assist in maintaining our web tools, fixing bugs in our open-source repositories, and updating simple system templates.'
+          },
+          {
+            icon: '💡',
+            title: 'General Contributor',
+            description: 'We welcome all talents! Bring your creativity, organizational ideas, or design skills to help improve the bxvCS mission.'
+          }
+        ];
+
+        const VALUES_DATA = [
+          {
+            num: '01',
+            title: 'True Open Access',
+            description: 'Education should not have a paywall. We provide completely fee-free, high-quality resources without hidden costs or premium tiers.'
+          },
+          {
+            num: '02',
+            title: 'Approachable Steps',
+            description: 'We break down complex, advanced coding concepts into logical, bite-sized lessons that build confidence naturally.'
+          },
+          {
+            num: '03',
+            title: 'Community Driven',
+            description: 'Built by learners, for learners. We are run alongside helpful volunteers who understand the struggles of self-taught engineering.'
+          }
+        ];
+
+        // ==========================================
+        // REUSABLE UI COMPONENTS & ICONS
+        // ==========================================
+        const ArrowRightIcon = () => (
+          <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        );
+
+        const CheckIcon = () => (
+          <svg className="w-4 h-4 text-emerald-500 mr-2 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+          </svg>
+        );
+
+        const UserAvatarSilhouette = () => (
+          <svg className="w-full h-full text-white/50" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+          </svg>
+        );
+
+        const ExternalLinkAction = ({ href, children, className = "" }) => (
+          <a 
+            href={href} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className={`inline-flex items-center justify-center transition-all ${className}`}
+          >
+            {children}
+          </a>
+        );
+
+        // ==========================================
+        // MAIN APP COMPONENT
+        // ==========================================
+        function App() {
+          const [activeTab, setActiveTab] = useState('home');
+
+          const navigate = (tabId) => {
+            setActiveTab(tabId);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          };
+
+          return (
+            <div className="min-h-screen flex flex-col">
+              {/* GLOBAL HEADER */}
+              <header className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/60">
+                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                  {/* Logo Area */}
+                  <button 
+                    onClick={() => navigate('home')}
+                    className="flex flex-col items-start group text-left"
+                  >
+                    <span className="text-2xl font-bold tracking-tight text-white group-hover:text-indigo-400 transition-colors">
+                      bxvCS
+                    </span>
+                    <span className="text-[10px] text-slate-400 tracking-wider uppercase font-semibold">
+                      Free Computer Science & Business Education for all
+                    </span>
+                  </button>
+
+                  {/* Desktop Navigation */}
+                  <nav className="hidden md:flex items-center gap-2">
+                    {[
+                      { id: 'home', label: 'Home' },
+                      { id: 'courses', label: 'Explore Courses' },
+                      { id: 'volunteer', label: 'Volunteer' }
+                    ].map(tab => (
+                      <button
+                        key={tab.id}
+                        onClick={() => navigate(tab.id)}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                          activeTab === tab.id
+                            ? 'bg-indigo-600/10 text-indigo-400 border border-indigo-500/20 shadow-sm'
+                            : 'text-slate-400 hover:text-white hover:bg-slate-800/50 border border-transparent'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </nav>
+
+                  {/* Mobile Nav Toggle */}
+                  <div className="md:hidden flex items-center space-x-4">
+                    <select 
+                      value={activeTab}
+                      onChange={(e) => navigate(e.target.value)}
+                      className="bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2"
+                    >
+                      <option value="home">Home</option>
+                      <option value="courses">Explore Courses</option>
+                      <option value="volunteer">Volunteer</option>
+                    </select>
+                  </div>
+                </div>
+              </header>
+
+              {/* MAIN CONTENT AREA */}
+              <main className="flex-grow">
+                {activeTab === 'home' && <HomeView navigate={navigate} />}
+                {activeTab === 'courses' && <CoursesView />}
+                {activeTab === 'volunteer' && <VolunteerView />}
+              </main>
+
+              {/* GLOBAL FOOTER */}
+              <footer className="bg-slate-950 border-t border-slate-800/60 pt-16 pb-8">
+                <div className="max-w-7xl mx-auto px-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+                    
+                    {/* Col 1 */}
+                    <div>
+                      <div className="mb-4">
+                        <span className="text-xl font-bold tracking-tight text-white">bxvCS</span>
+                        <span className="block text-[10px] text-slate-500 tracking-wider uppercase font-semibold mt-1">
+                          Education For All
+                        </span>
+                      </div>
+                      <p className="text-sm text-slate-400 leading-relaxed">
+                        Empowering the next generation of engineers, data scientists, and problem solvers through open-access, high-quality computer science education.
+                      </p>
+                    </div>
+
+                    {/* Col 2 */}
+                    <div>
+                      <h4 className="text-white font-semibold mb-4 tracking-wide text-sm uppercase">Platform</h4>
+                      <ul className="space-y-3 text-sm text-slate-400">
+                        <li><button onClick={() => navigate('home')} className="hover:text-indigo-400 transition-colors">Home Landing</button></li>
+                        <li><button onClick={() => navigate('courses')} className="hover:text-indigo-400 transition-colors">Our Curriculum</button></li>
+                      </ul>
+                    </div>
+
+                    {/* Col 3 */}
+                    <div>
+                      <h4 className="text-white font-semibold mb-4 tracking-wide text-sm uppercase">Collaborate</h4>
+                      <ul className="space-y-3 text-sm text-slate-400">
+                        <li><button onClick={() => navigate('volunteer')} className="hover:text-indigo-400 transition-colors"><a href="https://docs.google.com/forms/d/e/1FAIpQLSeCozjR-wv-YRCmMjAHJhfl1-YGLNHRMhZbJu-49GgTxUXTMQ/viewform?usp=sharing&ouid=115136085721616066455">Join as Volunteer</a></button></li>
+                      </ul>
+                    </div>
+
+                    {/* Col 4 */}
+                    <div>
+                      <h4 className="text-white font-semibold mb-4 tracking-wide text-sm uppercase">Enrollment</h4>
+                      <p className="text-sm text-slate-400 mb-4">
+                        Ready to start your journey? Registration takes less than 2 minutes.
+                      </p>
+                      <ExternalLinkAction 
+                        href={GOOGLE_FORM_URL}
+                        className="w-full bg-slate-900 border border-slate-700 hover:border-indigo-500/50 hover:bg-slate-800 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all"
+                      >
+                        Intake Questionnaire <ArrowRightIcon />
+                      </ExternalLinkAction>
+                    </div>
+
+                  </div>
+
+                  <div className="border-t border-slate-800/60 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <p className="text-sm text-slate-500">
+                      © {new Date().getFullYear()} bxvCS Education Platform. All rights reserved.
+                    </p>
+                    <div className="flex items-center gap-6 text-sm text-slate-500">
+                      <a href="#" className="hover:text-slate-300 transition-colors">Privacy Policy</a>
+                      <a href="#" className="hover:text-slate-300 transition-colors">Terms of Service</a>
+                    </div>
+                  </div>
+                </div>
+              </footer>
+            </div>
+          );
+        }
+
+        // ==========================================
+        // VIEW COMPONENTS
+        // ==========================================
+
+        function HomeView({ navigate }) {
+          const featuredCourses = COURSES_DATA.slice(0, 3);
+
+          return (
+            <div className="animate-[fadeIn_0.7s_ease-in-out]">
+              {/* Hero Section */}
+              <section className="py-24 md:py-32 px-6 max-w-4xl mx-auto text-center">
+                <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-6 leading-tight">
+                  Learn Computer Science. <br className="hidden md:block" />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-slate-200 to-indigo-300">
+                    Completely Free.
+                  </span>
+                </h1>
+                <p className="text-lg md:text-xl text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+                  We design and share thorough, structured programming paths to help anyone build solid fundamentals in coding, security, and machine learning.
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <ExternalLinkAction 
+                    href={GOOGLE_FORM_URL}
+                    className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3.5 rounded-xl font-medium transition-colors text-lg shadow-lg shadow-indigo-900/20"
+                  >
+                    Join the Program <ArrowRightIcon />
+                  </ExternalLinkAction>
+                  <button 
+                    onClick={() => navigate('courses')}
+                    className="w-full sm:w-auto bg-slate-900 border border-slate-700 hover:bg-slate-800 text-white px-8 py-3.5 rounded-xl font-medium transition-colors text-lg"
+                  >
+                    Browse Curriculums
+                  </button>
+                </div>
+              </section>
+
+              {/* Featured Paths Section */}
+              <section className="py-20 px-6 max-w-7xl mx-auto border-t border-slate-800/40">
+                <div className="flex flex-col md:flex-row items-baseline justify-between mb-12">
+                  <div>
+                    <h2 className="text-3xl font-bold text-white mb-2">Featured Learning Paths</h2>
+                    <p className="text-slate-400">Start with our most popular curriculums.</p>
+                  </div>
+                  <button 
+                    onClick={() => navigate('courses')}
+                    className="text-indigo-400 hover:text-indigo-300 font-medium flex items-center mt-4 md:mt-0 transition-colors"
+                  >
+                    View All {COURSES_DATA.length} Paths <ArrowRightIcon />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {featuredCourses.map(course => (
+                    <CourseCard key={course.id} course={course} />
+                  ))}
+                </div>
+              </section>
+            </div>
+          );
+        }
+
+        function CoursesView() {
+          return (
+            <div className="py-16 px-6 max-w-7xl mx-auto animate-[fadeIn_0.5s_ease-in-out]">
+              <div className="mb-12 max-w-2xl">
+                <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">
+                  Explore Curriculums
+                </h1>
+                <p className="text-lg text-slate-400 leading-relaxed">
+                  Comprehensive, step-by-step guides designed to take you from foundational concepts to advanced problem solving. Choose a path and begin your journey.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {COURSES_DATA.map(course => (
+                  <CourseCard key={course.id} course={course} isDetailed={true} />
+                ))}
+              </div>
+            </div>
+          );
+        }
+
+        function VolunteerView() {
+          return (
+            <div className="py-16 px-6 max-w-5xl mx-auto animate-[fadeIn_0.5s_ease-in-out]">
+              <div className="text-center mb-16 max-w-2xl mx-auto">
+                <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">
+                  Become a bxvCS Volunteer
+                </h1>
+                <p className="text-lg text-slate-400 leading-relaxed">
+                  Our platform thrives on community. Join a passionate team of volunteers dedicated to making high-quality tech education accessible to all.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+                {VOLUNTEER_ROLES.map((role, idx) => (
+                  <div key={idx} className="bg-slate-900/40 border border-slate-800/80 p-8 rounded-2xl flex gap-6">
+                    <div className="text-4xl flex-shrink-0 bg-slate-800 h-16 w-16 flex items-center justify-center rounded-xl border border-slate-700">
+                      {role.icon}
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-white mb-2">{role.title}</h3>
+                      <p className="text-slate-400 leading-relaxed">{role.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="bg-gradient-to-br from-indigo-900/40 to-slate-900 border border-indigo-500/20 p-10 rounded-3xl text-center">
+                <h2 className="text-2xl font-bold text-white mb-4">Ready to make an impact?</h2>
+                <p className="text-slate-300 mb-8 max-w-xl mx-auto">
+                  Whether you have 2 hours a week or 10, your contribution helps break down educational barriers. Fill out our simple intake form to get started.
+                </p>
+                <ExternalLinkAction 
+                  href={"https://docs.google.com/forms/d/e/1FAIpQLSeCozjR-wv-YRCmMjAHJhfl1-YGLNHRMhZbJu-49GgTxUXTMQ/viewform?usp=sharing&ouid=115136085721616066455"}
+                  className="bg-white text-slate-950 hover:bg-slate-200 px-8 py-3.5 rounded-xl font-semibold transition-colors text-lg"
+                >
+                  Open Volunteer Application Form
+                </ExternalLinkAction>
+              </div>
+            </div>
+          );
+        }
+
+        // ==========================================
+        // MICRO COMPONENTS
+        // ==========================================
+        function CourseCard({ course, isDetailed = false }) {
+          return (
+            <div className="bg-slate-900/40 hover:bg-slate-900/80 border border-slate-800/80 hover:border-indigo-500/30 transition-all duration-300 rounded-2xl flex flex-col overflow-hidden group">
+              <div className="p-6 md:p-8 flex-grow flex flex-col">
+                {/* Badges */}
+                <div className="flex flex-wrap gap-2 mb-6">
+                  <span className="bg-indigo-900/30 text-indigo-300 text-xs font-semibold px-3 py-1 rounded-full border border-indigo-500/20">
+                    {course.category}
+                  </span>
+                  <span className="bg-slate-800/50 text-slate-300 text-xs font-semibold px-3 py-1 rounded-full border border-slate-700/50">
+                    {course.duration}
+                  </span>
+                </div>
+                
+                {/* Title & Desc */}
+                <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-indigo-100 transition-colors">
+                  {course.title}
+                </h3>
+                <p className="text-slate-400 mb-6 leading-relaxed flex-grow">
+                  {course.description}
+                </p>
+
+                {/* Syllabus Outline (Conditional on isDetailed or layout needs) */}
+                {isDetailed && (
+                  <div className="mb-8 mt-2">
+                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 border-b border-slate-800 pb-2">Syllabus Outline</h4>
+                    <ul className="space-y-3">
+                      {course.syllabus.map((item, i) => (
+                        <li key={i} className="flex items-start text-sm text-slate-300">
+                          <CheckIcon />
+                          <span className="leading-tight">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Bottom Row */}
+                <div className="pt-6 border-t border-slate-800/60 mt-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="text-sm font-medium text-slate-400 w-full sm:w-auto text-center sm:text-left">
+                    Level: <span className="text-slate-200">{course.difficulty}</span>
+                  </div>
+                  <ExternalLinkAction 
+                    href={GOOGLE_FORM_URL}
+                    className="w-full sm:w-auto bg-slate-800 group-hover:bg-indigo-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    Register to Start
+                  </ExternalLinkAction>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        // ==========================================
+        // RENDER THE APP
+        // ==========================================
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+
+    <!-- Basic CSS for simple animations since we can't use external CSS easily here -->
+    <style>
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    </style>
+</body>
+</html>
